@@ -6,14 +6,14 @@ struct Point
 {
     int x;
     int y;
-}
+};
 
 struct Something
 {
     int x;
     int y;
     int z;
-}
+};
 
 int getIndex(int mapWidth, Point point)
 {
@@ -41,7 +41,7 @@ int getDistance(int mapWidth, int index, int targetIndex)
 
 bool isSamePoint(const Point& pointA, const Point& pointB)
 {
-    return (pointA.x == pointB.x) && (pointA.y == pointB.y)
+    return (pointA.x == pointB.x) && (pointA.y == pointB.y);
 }
 
 bool FindPath(const Point Start,
@@ -69,8 +69,8 @@ bool FindPath(const Point Start,
     
     // A* with tie breaking
     std::priority_queue<std::tuple<int, int, int>,
-    std::vector<std::tuple<int, int, int>>,
-    std::greater<std::tuple<int, int, int>>> pq;
+                        std::vector<std::tuple<int, int, int>>,
+                        std::greater<std::tuple<int, int, int>>> pq;
     
     distanceMap[startPos] = 0;
     
