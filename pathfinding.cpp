@@ -2,36 +2,65 @@
 #include <queue>
 #include <tuple>
 
-bool FindPath(std::pair<int, int> Start,
-              std::pair<int, int> Target,
+struct Point
+{
+    int x;
+    int y;
+}
+
+struct Something
+{
+    int x;
+    int y;
+    int z;
+}
+
+int getIndex(int mapWidth, Point point)
+{
+    return point.x + (point.y * mapWidth);
+}
+
+Point getPoint(int mapWidth, int index)
+{
+    Point point;
+    
+    point.x = index % mapWidth;
+    point.y = index / mapWidth;
+    
+    return point;
+}
+
+//Calculate Manhattan Distance from index to targetIndex
+int getDistance(int mapWidth, int index, int targetIndex)
+{
+    const Point start = getPoint(mapWidth, index);
+    const Point target = getPoint(mapWidth, targetIndex);
+    
+    return abs(start.x - target.x) + abs(start.y - target.y);
+}
+
+bool isSamePoint(const Point& pointA, const Point& pointB)
+{
+    return (pointA.x == pointB.x) && (pointA.y == pointB.y)
+}
+
+bool FindPath(const Point Start,
+              const Point Target,
               const std::vector<int>& Map,
-              std::pair<int, int> MapDimensions,
+              const std::pair<int, int> MapDimensions,
               std::vector<int>& OutPath)
 {
-    const bool areStartAndTargetSameLocation = (Start.first == Target.first) && (Start.second == Target.second);
+    const bool areStartAndTargetSameLocation = isSamePoint(Start, Target);
     
     if(areStartAndTargetSameLocation)
     {
         return true;
     }
     
-    auto getIndex = [MapDimensions](int x, int y) {
-        return x + y * MapDimensions.first;
-    };
-    
-    //Calculate index manhattan distance to target
-    auto distance = [=](int index) -> int {
-        
-        //Get coordinates from index
-        const int x = index % MapDimensions.first;
-        const int y = index / MapDimensions.first;
-        
-        return abs(x - Target.first) + abs(y - Target.second);
-    };
-    
     const int mapSize = MapDimensions.first * MapDimensions.second;
-    const int startPos = getIndex(Start.first, Start.second);
-    const int targetPos = getIndex(Target.first, Target.second);
+    const int mapWidth = MapDimensions.first;
+    const int startPos = getIndex(mapWidth, Start);
+    const int targetPos = getIndex(mapWidth, Target);
     
     int discovered = 0;
     
@@ -45,7 +74,10 @@ bool FindPath(std::pair<int, int> Start,
     
     distanceMap[startPos] = 0;
     
-    pq.push(std::make_tuple(0 + distance(startPos), 0, startPos));
+    //directions for right, left, up and down
+    const vector<int> directions = {1, -1, mapWidth, -mapWidth};
+    
+    pq.push(std::make_tuple(0 + getDistance(mapWidth, startPos, targetPos), 0, startPos));
     
     bool foundPath = false;
     
@@ -54,13 +86,13 @@ bool FindPath(std::pair<int, int> Start,
         int current = std::get<2>(pq.top());
         pq.pop();
         
-        for(auto direction : {+1, -1, +MapDimensions.first, -MapDimensions.first})
+        for(auto direction : directions)
         {
-            int neighbour = current + direction;
+            const int neighbour = current + direction;
             
             //Avoid invalid cells
-            if((direction == 1 && (neighbour % MapDimensions.first == 0)) ||
-               (direction == -1 && (current % MapDimensions.first == 0)))
+            if((direction == 1 && (neighbour % mapWidth == 0)) ||
+               (direction == -1 && (current % mapWidth == 0)))
             {
                 continue;
             }
@@ -68,7 +100,7 @@ bool FindPath(std::pair<int, int> Start,
             if (0 <= neighbour &&
                 neighbour < mapSize &&
                 distanceMap[neighbour] > distanceMap[current] + 1 &&
-                Map[neighbour] == 1)
+                Map.at(neighbour) == 1)
             {
                 parentMap[neighbour] = current;
                 distanceMap[neighbour] = distanceMap[current] + 1;
@@ -81,7 +113,9 @@ bool FindPath(std::pair<int, int> Start,
                 }
                 
                 //Add neighbour to queue to check
-                pq.push(std::make_tuple(distanceMap[neighbour] + distance(neighbour), ++discovered, neighbour));
+                pq.push(std::make_tuple(distanceMap[neighbour] + getDistance(mapWidth, neighbour, targetPos),
+                                        ++discovered,
+                                        neighbour));
             }
         }
         
