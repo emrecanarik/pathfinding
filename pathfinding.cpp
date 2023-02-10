@@ -75,7 +75,7 @@ bool FindPath(const Point Start,
     distanceMap[startPos] = 0;
     
     //directions for right, left, up and down
-    const vector<int> directions = {1, -1, mapWidth, -mapWidth};
+    const std::vector<int> directions = {1, -1, mapWidth, -mapWidth};
     
     pq.push(std::make_tuple(0 + getDistance(mapWidth, startPos, targetPos), 0, startPos));
     
